@@ -1,0 +1,62 @@
+heat_template_version: 2015-04-30
+
+description: >
+  Internal API network. Used for most APIs, Database, RPC.
+
+parameters:
+  # the defaults here work for static IP assignment (IPAM) only
+  MonitoringNetCidr:
+    default: '172.16.2.0/24'
+    description: Cidr for the internal API network.
+    type: string
+  MonitoringNetValueSpecs:
+    default: {'provider:physical_network': 'monitoring', 'provider:network_type': 'flat'}
+    description: Value specs for the internal API network.
+    type: json
+  MonitoringNetAdminStateUp:
+    default: false
+    description: This admin state of the network.
+    type: boolean
+  MonitoringNetEnableDHCP:
+    default: false
+    description: Whether to enable DHCP on the associated subnet.
+    type: boolean
+  MonitoringNetShared:
+    default: false
+    description: Whether this network is shared across all tenants.
+    type: boolean
+  MonitoringNetName:
+    default: monitoring
+    description: The name of the internal API network.
+    type: string
+  MonitoringSubnetName:
+    default: monitoring_subnet
+    description: The name of the internal API subnet in Neutron.
+    type: string
+  MonitoringAllocationPools:
+    default: [{'start': '172.16.2.4', 'end': '172.16.2.250'}]
+    description: Ip allocation pool range for the internal API network.
+    type: json
+
+resources:
+  MonitoringNetwork:
+    type: OS::Neutron::Net
+    properties:
+      admin_state_up: {get_param: MonitoringNetAdminStateUp}
+      name: {get_param: MonitoringNetName}
+      shared: {get_param: MonitoringNetShared}
+      value_specs: {get_param: MonitoringNetValueSpecs}
+
+  MonitoringSubnet:
+    type: OS::Neutron::Subnet
+    properties:
+      cidr: {get_param: MonitoringNetCidr}
+      enable_dhcp: {get_param: MonitoringNetEnableDHCP}
+      name: {get_param: MonitoringSubnetName}
+      network: {get_resource: MonitoringNetwork}
+      allocation_pools: {get_param: MonitoringAllocationPools}
+
+outputs:
+  OS::stack_id:
+    description: Neutron internal network
+    value: {get_resource: MonitoringNetwork}

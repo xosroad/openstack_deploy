@@ -1,0 +1,3 @@
+#!/bin/bash
+
+SUFFIX=$(date +%Y%m%d-%H%M%S); time openstack overcloud deploy --templates templates/openstack-tripleo-heat-templates/ -e templates/openstack-tripleo-heat-templates/environments/network-isolation.yaml -e templates/ceph-external.yaml -e templates/network-environment.yaml --control-scale 3 --compute-scale 6 --ceph-storage-scale 0 --control-flavor control --compute-flavor compute --ceph-storage-flavor ceph-storage --neutron-bridge-mappings ctlcentre:br-ctlplane,datacentre:br-dataplane --neutron-vni-ranges 1:524288 --neutron-network-vlan-ranges ctlcentre:102:105,datacentre:106:4094  --ntp-server 10.253.3.4 --validation-errors-fatal --timeout 50 --stack overcloud-2 # | tee -a overcloud_deployment-$SUFFIX.log
